@@ -19,25 +19,26 @@
 #include <sstream>
 
 #include "swift/AST/ASTContext.h"
+#include "swift/AST/ASTMangler.h"
 #include "swift/AST/DebuggerClient.h"
 #include "swift/AST/Decl.h"
 #include "swift/AST/DiagnosticEngine.h"
 #include "swift/AST/ExistentialLayout.h"
-#include "swift/AST/IRGenOptions.h"
-#include "swift/AST/ASTMangler.h"
 #include "swift/AST/GenericSignature.h"
+#include "swift/AST/IRGenOptions.h"
 #include "swift/AST/NameLookup.h"
 #include "swift/AST/SearchPathOptions.h"
 #include "swift/AST/Type.h"
 #include "swift/AST/Types.h"
 #include "swift/ASTSectionImporter/ASTSectionImporter.h"
-#include "swift/Demangling/Demangle.h"
 #include "swift/Basic/Dwarf.h"
 #include "swift/Basic/LangOptions.h"
 #include "swift/Basic/Platform.h"
+#include "swift/Basic/PrimarySpecificPaths.h"
 #include "swift/Basic/SourceManager.h"
 #include "swift/ClangImporter/ClangImporter.h"
 #include "swift/ClangImporter/ClangImporterOptions.h"
+#include "swift/Demangling/Demangle.h"
 #include "swift/Driver/Util.h"
 #include "swift/Frontend/Frontend.h"
 #include "swift/Frontend/PrintingDiagnosticConsumer.h"
@@ -4556,8 +4557,8 @@ swift::SILModule *SwiftASTContext::GetSILModule() {
   VALID_OR_RETURN(nullptr);
 
   if (m_sil_module_ap.get() == NULL)
-    m_sil_module_ap = swift::SILModule::createEmptyModule(GetScratchModule(),
-                                                          GetSILOptions());
+    m_sil_module_ap = swift::SILModule::createEmptyModule(
+                                                          GetScratchModule(), GetSILOptions(), swift::PrimarySpecificPaths("", "<lldb>"));
   return m_sil_module_ap.get();
 }
 
@@ -4607,7 +4608,7 @@ swift::irgen::IRGenModule &SwiftASTContext::GetIRGenModule() {
         m_ir_gen_module_ap.reset(new swift::irgen::IRGenModule(
             ir_generator, ir_generator.createTargetMachine(), nullptr,
             GetGlobalLLVMContext(), ir_gen_opts.ModuleName,
-            ir_gen_opts.getSingleOutputFilename()));
+                                                               swift::PrimarySpecificPaths(ir_gen_opts.getSingleOutputFilename(), "<lldb>")));
         llvm::Module *llvm_module = m_ir_gen_module_ap->getModule();
         llvm_module->setDataLayout(data_layout.getStringRepresentation());
         llvm_module->setTargetTriple(triple);

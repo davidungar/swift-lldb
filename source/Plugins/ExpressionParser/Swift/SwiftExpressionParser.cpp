@@ -60,6 +60,7 @@
 #include "swift/AST/ModuleLoader.h"
 #include "swift/Demangling/Demangle.h"
 #include "swift/Basic/SourceManager.h"
+#include "swift/Basic/PrimarySpecificPaths.h"
 #include "swift/ClangImporter/ClangImporter.h"
 #include "swift/Frontend/Frontend.h"
 #include "swift/Parse/LocalContext.h"
@@ -1724,7 +1725,8 @@ unsigned SwiftExpressionParser::Parse(DiagnosticManager &diagnostic_manager,
   }
 
   std::unique_ptr<swift::SILModule> sil_module(swift::performSILGeneration(
-      *source_file, m_swift_ast_context->GetSILOptions()));
+      *source_file, m_swift_ast_context->GetSILOptions(),
+                                                                           swift::PrimarySpecificPaths("", "<lldb>")));
 
   if (log) {
     std::string s;
